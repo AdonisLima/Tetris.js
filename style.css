@@ -1,0 +1,74 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/*Grid*/
+.grid{
+    display: grid;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.title{
+    grid-area: title;
+}
+
+.stage{
+    grid-area: stage;
+}
+
+.grid-template-areas-1{
+    grid-template-areas: 
+    "title"
+    "stage";
+}
+
+/*Subgrid*/
+.score{
+    grid-area: score;
+}
+
+.time{
+    grid-area: time;
+}
+
+.gamefield{
+    grid-area: gamefield;
+}
+
+.next-tetramino{
+    grid-area: next-tetramino;
+}
+
+.grid-template-areas-2{
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 170px 170px;
+    grid-template-areas: 
+    "score gamefield next-tetramino"
+    "time gamefield next-tetramino"
+    ". gamefield ."
+    ". gamefield .";    
+}
+
+/*Grid item*/
+
+.item{
+    text-align: center;
+}
+
+.side-panel{
+    border: 1px solid brown;
+    background: #f0f5f0;
+}
+
+.subitem{
+    margin: 5px;
+}
+
+.title{
+    padding: 16px 32px;
+    margin-bottom: 3px;
+}
