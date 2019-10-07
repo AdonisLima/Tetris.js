@@ -9,7 +9,7 @@
     <title>Document</title>
 </head>
 
-<body>
+<body onload="init();">
 
     <div class="grid grid-template-areas-1">
         <div class="item title">
@@ -19,11 +19,13 @@
             <div class="grid subgrid grid-template-areas-2">
                 <div class="subitem side-panel score">
                     <h2>Score</h2>
+                    <span id="score"></span>
                 </div>
                 <div class="subitem side-panel time">
                     <h2>Time</h2>
+                    <span id="time"></span>
                 </div>
-                <div class="subitem gamefield">
+                <div class="subitem gamefield" >
                     <canvas id="game-canvas" width="300" height="600"></canvas><br>
                 </div>
                 <div class="subitem side-panel next-tetramino">
@@ -31,11 +33,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
-
     <script src="main.js"></script>
 </body>
-
 </html>
