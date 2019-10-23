@@ -1,8 +1,11 @@
 let canvas = [];
 let context = [];
-let matrix = [];
-let currentPiece = [];
+let matrix = {};
+
+let currentPiece = {};
+
 let score = 0;
+let tick = 300;
 const widthInPixels = 300;
 const heightInPixels = 600;
 const widthInBlocks = 10;
@@ -10,92 +13,17 @@ const heightInBlocks = 20;
 const blockWidth = widthInPixels / widthInBlocks;
 const blockHeight = heightInPixels / heightInBlocks;
 
-//TODO change all functions to arrow functions
-
-class GameField {
-    constructor(grid) {
-        this._grid = grid;
-    }
-
-    get grid() {
-        return this._grid;
-    }
-
-    set grid(grid) {
-        this._grid = grid;
-    }
-
-    static initMatrix(widthInBlocks, heightInBlocks) {
-        let grid = new Array(heightInBlocks);
-        for (let i = 0; i < heightInBlocks; i++) {
-            grid[i] = new Array(widthInBlocks).fill(0);
-        }
-        return grid;
-    }
-}
-
-class Piece {
-    constructor(id, colSpawnPoint, rowSpawnPoint, shape, color) {
-        this._id = id;
-        this._spawnPointCol = colSpawnPoint;
-        this._rowSpawnPoint = rowSpawnPoint;
-        this._shape = shape;
-        this._color = color;
-    }
-
-    get id() {
-        return this._id;
-    }
-
-    get colSpawnPoint() {
-        return this._spawnPointCol;
-    }
-
-    set colSpawnPoint(newSpawnPointCol) {
-        this._spawnPointCol = newSpawnPointCol;
-    }
-
-    get rowSpawnPoint() {
-        return this._rowSpawnPoint;
-    }
-
-    set rowSpawnPoint(newRowSpawnPoint) {
-        this._rowSpawnPoint = newRowSpawnPoint;
-    }
-
-    get shape() {
-        return this._shape;
-    }
-
-    set shape(newShape) {
-        this._shape = newShape;
-    }
-
-    get color() {
-        return this._color;
-    }
-
-    set color(newColor) {
-        this._color = newColor;
-    }
-
-    //Apply offset to the rotations
-    rotate90deg() {
-        //TODO
-    }
-}
-
-function initCanvas() {
+let initCanvas = () => {
     canvas = document.getElementById("game-canvas");
     if (canvas.getContext) {
         context = canvas.getContext("2d");
-        context.strokeRect(0, 0, widthInPixels, heightInPixels);
+        // context.strokeRect(0, 0, widthInPixels, heightInPixels);
     }
-}
+};
 
 //Inicia matrix vazia do campo do jogo.
 //Retorna um objeto Gamefield
-function initMatrix() {
+let initMatrix = () => {
     let field = new GameField((() => {
         let grid = new Array(heightInBlocks);
         for (let i = 0; i < heightInBlocks; i++) {
@@ -105,38 +33,19 @@ function initMatrix() {
     })());
 
     return field;
-}
-
+};
 
 //Draws a single block given the column and the row
-//TODO use rest operator
-function drawBlock(row, col) {
+let drawBlock = (row, col) => {
     context.fillRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
-    context.strokeRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
-}
+};
 
-//For testing purposes only
-function testDraw() {
-    document.write(`<button id="myBtn">Click me to draw a single block</button>`);
-    let active = false;
-    document.getElementById("myBtn").addEventListener("click", function () {
-        if (!active) {
-            drawBlock(1, 1);
-        } else {
-            context.clearRect(1, 1, widthInPixels - 2, heightInPixels - 2);
-        }
-        active = !active;
-    });
-}
-
-function init() {
+let init = () => {
     initCanvas();
     matrix = initMatrix();
-}
+};
 
-init();
-
-let pI = new Piece(0, 3, 0,
+let pI = new Piece(1, 3, 0,
     [
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
@@ -147,7 +56,7 @@ let pI = new Piece(0, 3, 0,
     '#27E2F4' //Light blue
 );
 
-let pJ = new Piece(1, 3, 0,
+let pJ = new Piece(2, 3, 0,
     [
         [2, 0, 0],
         [2, 2, 2],
@@ -156,7 +65,7 @@ let pJ = new Piece(1, 3, 0,
     '#1701FE' //Dark Blue
 );
 
-let pL = new Piece(2, 5, 0,
+let pL = new Piece(3, 5, 0,
     [
         [0, 0, 3],
         [3, 3, 3],
@@ -165,7 +74,7 @@ let pL = new Piece(2, 5, 0,
     '#E46F02' //Orange
 );
 
-let pO = new Piece(3, 3, 0,
+let pO = new Piece(4, 3, 0,
     [
         [0, 4, 4],
         [0, 4, 4],
@@ -174,7 +83,7 @@ let pO = new Piece(3, 3, 0,
     '#F4D800' //Yellow
 );
 
-let pS = new Piece(4, 4, 0,
+let pS = new Piece(5, 4, 0,
     [
         [0, 5, 5],
         [5, 5, 0],
@@ -183,7 +92,7 @@ let pS = new Piece(4, 4, 0,
     '#7BF800' //Green
 );
 
-let pZ = new Piece(5, 3, 0,
+let pZ = new Piece(6, 3, 0,
     [
         [6, 6, 0],
         [0, 6, 6],
@@ -192,7 +101,7 @@ let pZ = new Piece(5, 3, 0,
     '#D40D3A' //Red
 );
 
-let pT = new Piece(6, 4, 0,
+let pT = new Piece(7, 4, 0,
     [
         [0, 5, 0],
         [5, 5, 5],
@@ -211,101 +120,68 @@ The Random Generator (also known as "random bag" or "7 bag") determines the sequ
     source: https://tetris.wiki/Tetris_Guideline
 */
 
-// function spawnTetro(tetro) {
-//     current = tetro;
 
-//     let posX = current.x;
-//     let posY = current.y;
-//     let dataLength = current.shape.length;
+let drawTetro = () => {
 
-//     // x ~ j ~ row
-//     //y ~ i ~ col
-//     let j = 0;
-//     let x = 0;
-//     for (let i = 0; i < dataLength; i++) {
-//         if (current.shape[i]) {
-//             drawBlock(posX + x, posY + j);
-//             matrix.grid[posY + j][posX + x] = current.shape[i];
-//         }
-//         if ((i + 1) % (dataLength % 5 == 0 ? 5 : 3) === 0) {
-//             j++;
-//             x = 0;
-//         } else {
-//             x++;
-//         }
-//     }
-//     // drawOnCanvas(current);
-// }
+    let col = currentPiece.colSpawnPoint,
+        row = currentPiece.rowSpawnPoint,
+        tetroLength = currentPiece.shape.length,
+        previousTetroColPosition = 0,
+        previousTetroRowPosition = 0,
+        isFirstBlockDrawn = false;
 
-let rotateTetro = (tetro) => {
-    let m = tetro.shape;
-    console.log(m);
-    let n = m.length;
-
-    for (let i = 0; i < Math.floor(n / 2); i++) {
-        for (let j = 0; j < n - (2 * i) - 1; j++) {
-            let t = m[i + j][n - 1 - i]; // t = B
-            m[i + j][n - 1 - i] = m[i][i + j]; //B = A
-            m[i][i + j] = t; //A = t
-
-            t = m[n - 1 - i][n - 1 - i - j];
-            m[n - 1 - i][n - 1 - i - j] = m[i][i + j];
-            m[i][i + j] = t;
-
-            t = m[n - 1 - i - j][i];
-            m[n - 1 - i - j][i] = m[i][i + j];
-            m[i][i + j] = t;
-        }
-    }
-
-    //Setar novos spawnPoints
-    /* for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            if (tetro.shape[i][j]) {
-                tetro.rowSpawnPoint = i;
-                tetro.colSpawnPoint = j;
-
-                console.log(`j: ${j} i:${i}`);
-
-                return tetro;
-            }
-        }
-    } */
-
-    return tetro;
-
-};
-
-let spawnTetro = (tetro) => {
-
-    current = tetro;
-
-    let col = current.colSpawnPoint,
-        row = current.rowSpawnPoint,
-        tetroLength = current.shape.length,
-        previousColPosition = 0,
-        previousRowPosition = 0;
-    let firstBlockDrawn = false;
+    currentCoordinates = [];
 
     for (let i = 0; i < tetroLength; i++) {
         for (let j = 0; j < tetroLength; j++) {
-            if (current.shape[i][j]) {
-                if (!firstBlockDrawn) {
-
+            if (currentPiece.shape[i][j]) {
+                if (!isFirstBlockDrawn) {
                     drawBlock(row, col);
-                    firstBlockDrawn = !firstBlockDrawn;
+                    isFirstBlockDrawn = !isFirstBlockDrawn;
                 } else {
-                    drawBlock(row = (i - previousRowPosition) + row, col = (j - previousColPosition) + col);
+                    col += (j - previousTetroColPosition);
+                    row += (i - previousTetroRowPosition);
+                    drawBlock(row, col);
                 }
 
-                previousColPosition = j;
-                previousRowPosition = i;
+                currentCoordinates.push([row, col]);
 
-
-                matrix.grid[row][col] = current.shape[i][j];
+                previousTetroColPosition = j;
+                previousTetroRowPosition = i;
             }
         }
     }
+};
+
+let getCoordinates = () => {
+    let col = currentPiece.colSpawnPoint,
+        row = currentPiece.rowSpawnPoint,
+        tetroLength = currentPiece.shape.length,
+        previousTetroColPosition = 0,
+        previousTetroRowPosition = 0,
+        isFirstBlockIdentified = false;
+
+    currentCoordinates = [];
+
+    for (let i = 0; i < tetroLength; i++) {
+        for (let j = 0; j < tetroLength; j++) {
+            if (currentPiece.shape[i][j]) {
+                if (!isFirstBlockIdentified) {
+                    isFirstBlockIdentified = !isFirstBlockIdentified;
+                } else {
+                    col += (j - previousTetroColPosition);
+                    row += (i - previousTetroRowPosition);
+                }
+
+                currentCoordinates.push([row, col]);
+
+                previousTetroColPosition = j;
+                previousTetroRowPosition = i;
+            }
+        }
+    }
+    // console.log(currentCoordinates);
+    return currentCoordinates;
 };
 
 let printGrid = matrix => {
@@ -320,20 +196,124 @@ let printGrid = matrix => {
     }
 };
 
-//spawnTetro(pI);
-//spawnTetro(pJ);
-//spawnTetro(pL);
-// spawnTetro(pO);
-// spawnTetro(pS);
-//spawnTetro(pZ);
-//spawnTetro(pT);
+function newPiece() {
+    currentPiece = new Piece();
+    currentPiece = Object.assign(currentPiece, arr[Math.floor(Math.random() * arr.length)]);
+}
 
-//drawBlock(0, 3);
+//Warning: essa funcção só é destinada a Objetos Piece
+function isEmpty(obj = currentPiece) {
+    for (let _id in obj) {
+        if (obj.hasOwnProperty(_id)) {
+            return false;
+        }
+    }
+    return true;
+}
 
-// pJ = rotateTetro(pJ);
-// spawnTetro(rotateTetro(rotateTetro(rotateTetro(rotateTetro(pJ)))));
-// spawnTetro(rotateTetro(rotateTetro(rotateTetro(pJ))));
-spawnTetro(pZ)
+//Check if position is valid yet
+//Cases: 
+let isValid = (currentCoordinates) => {
 
+};
 
-printGrid(matrix);
+//Check if there's no more room for the piece to move
+//Edge cases: Borders
+//            
+let isBlocked = (currentCoordinates) => {
+
+    for (i = 0; i < currentCoordinates.length; i++) {
+        for (j = 0; j < currentCoordinates[i].length; j++) {
+            if (currentCoordinates[i][j] == heightInBlocks - 1) {
+                return true;
+            }
+        }
+    }
+
+    //TODO: TRATAMENTO PARA AS OUTRAS BORDAS
+
+    //TODO: TRATAMENTO PARA PEÇA QUE COLIDEM COM AS ANTIGAS
+
+    return false;
+};
+
+let clearBlock = (row, col) => {
+    context.clearRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
+};
+
+let clearTetro = (currentCoordinates) => {
+    for (i = 0; i < currentCoordinates.length; i++) 
+        clearBlock(currentCoordinates[i][0], currentCoordinates[i][1]);
+};
+
+let clearAll = () => {
+    context.clearRect(1, 1, canvas.width - 2, canvas.height - 2);
+};
+
+let settleDown = (currentCoordinates) => {
+    //Passar para a matriz
+    for()
+};
+
+let update = () => {
+    if (isEmpty()) {
+        newPiece();
+    } else {
+        clearTetro(currentCoordinates);
+    }
+    currentCoordinates = getCoordinates();
+    // clearAll();
+
+    drawTetro();
+
+    // console.log(currentCoordinates);
+    // console.log(currentPiece);
+
+    // if(!isValid()){
+    //      console.log("You lose");
+    //      clearTimeout(game);
+    //      TODO: reset();
+    // }
+
+    currentPiece.rowSpawnPoint++;
+
+    // console.log(currentPiece.rowSpawnPoint);
+    //TODO INSERT CODE THAT CHECK IF THERE'S MORE ROOM TO SLIDE
+    //Check space goes down here
+    // console.log(isBlocked(currentCoordinates));
+    if (isBlocked(currentCoordinates)) {
+        //TODO: settleDown(currentCoordinates);
+        currentPiece = {};
+        // clearTetro(currentCoordinates);
+        // clearInterval(game);
+    }
+
+};
+
+init();
+
+//Teste com todas as peças
+let arr = new Array();
+arr.push(pI);
+arr.push(pJ);
+arr.push(pL);
+arr.push(pO);
+arr.push(pS);
+arr.push(pZ);
+arr.push(pT);
+console.log(arr);
+
+clearAll();
+let game = setInterval(() => update(), tick);
+drawBlock(1, 1);
+clearBlock(1, 1);
+
+function printMatrixBtn() {
+    document.write(`<button id="myBtn">Click me to PRINT A MATRIX</button>`);
+
+    document.getElementById("myBtn").addEventListener("click", function () {
+        printGrid(matrix);
+    });
+}
+
+// printMatrixBtn();
