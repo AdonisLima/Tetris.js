@@ -1,9 +1,9 @@
 class Piece {
-    constructor(id, colSpawnPoint, rowSpawnPoint, shape, color) {
+    constructor(id, colPos, rowPos, coordinates, color) {
         this._id = id;
-        this._colSpawnPoint = colSpawnPoint;
-        this._rowSpawnPoint = rowSpawnPoint;
-        this._shape = shape;
+        this._colPos = colPos;
+        this._rowPos = rowPos;
+        this._coordinates = coordinates;
         this._color = color;
     }
 
@@ -11,28 +11,28 @@ class Piece {
         return this._id;
     }
 
-    get colSpawnPoint() {
-        return this._colSpawnPoint;
+    get colPos() {
+        return this._colPos;
     }
 
-    set colSpawnPoint(newColSpawnPoint) {
-        this._colSpawnPoint = newColSpawnPoint;
+    set colPos(newColPos) {
+        this._colPos = newColPos;
     }
 
-    get rowSpawnPoint() {
-        return this._rowSpawnPoint;
+    get rowPos() {
+        return this._rowPos;
     }
 
-    set rowSpawnPoint(newRowSpawnPoint) {
-        this._rowSpawnPoint = newRowSpawnPoint;
+    set rowPos(newRowPos) {
+        this._rowPos = newRowPos;
     }
 
-    get shape() {
-        return this._shape;
+    get coordinates() {
+        return this._coordinates;
     }
 
-    set shape(newShape) {
-        this._shape = newShape;
+    set coordinates(newCoordinates) {
+        this._coordinates = newCoordinates;
     }
 
     get color() {
@@ -44,7 +44,7 @@ class Piece {
     }
 
     rotate() {
-        let m = this.shape;
+        let m = this.coordinates;
         console.log(m);
         let n = m.length;
         
@@ -53,8 +53,8 @@ class Piece {
             for(let i = 0; i < m.length; i++){
                 for(let j = 0; j < m.length; j++){
                     if(m[i][j]){
-                        m.rowSpawnPoint = i;
-                        m.colSpawnPoint = j;
+                        m.rowPos = i;
+                        m.colPos = j;
                         return;
                     }
                 }
