@@ -15,8 +15,8 @@ class Piece {
         return this._colSpawnPoint;
     }
 
-    set colSpawnPoint(newSpawnPointCol) {
-        this.colSpawnPoint = newColSpawnPoint;
+    set colSpawnPoint(newColSpawnPoint) {
+        this._colSpawnPoint = newColSpawnPoint;
     }
 
     get rowSpawnPoint() {
@@ -47,6 +47,21 @@ class Piece {
         let m = this.shape;
         console.log(m);
         let n = m.length;
+        
+
+        let a = (m) =>{
+            for(let i = 0; i < m.length; i++){
+                for(let j = 0; j < m.length; j++){
+                    if(m[i][j]){
+                        m.rowSpawnPoint = i;
+                        m.colSpawnPoint = j;
+                        return;
+                    }
+                }
+            }
+        };
+        a(m);   
+        
 
         for (let i = 0; i < Math.floor(n / 2); i++) {
             for (let j = 0; j < n - (2 * i) - 1; j++) {
@@ -63,6 +78,8 @@ class Piece {
                 m[i][i + j] = t;
             }
         }
+
+        
     }
 
 }

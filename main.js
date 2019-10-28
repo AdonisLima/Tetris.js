@@ -1,8 +1,9 @@
 let canvas = [];
 let context = [];
-let matrix = {};
-
-let currentPiece = {};
+let field = {};
+// let colSpawnPoint = 0;
+// let rowSpawnPoint = 3;
+let current = {};
 
 let score = 0;
 let tick = 300;
@@ -21,7 +22,7 @@ let initCanvas = () => {
     }
 };
 
-//Inicia matrix vazia do campo do jogo.
+//Inicia field vazia do campo do jogo.
 //Retorna um objeto Gamefield
 let initMatrix = () => {
     let field = new GameField((() => {
@@ -37,12 +38,13 @@ let initMatrix = () => {
 
 //Draws a single block given the column and the row
 let drawBlock = (row, col) => {
+    context.fillStyle = current.color;
     context.fillRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
 };
 
 let init = () => {
     initCanvas();
-    matrix = initMatrix();
+    field = initMatrix();
 };
 
 let pI = new Piece(1, 3, 0,
@@ -114,27 +116,24 @@ let pT = new Piece(7, 4, 0,
 /*
     Random Generator
 The Random Generator (also known as "random bag" or "7 bag") determines the sequence
- of tetrominoes during gameplay. One of each of the 7 tetrominoes are shuffled in a 
- "bag", and are dealt out one by one. When the bag is empty, a new one is filled 
+ of tetrominoes during gameplay. One of each of the 7 tetrominoes are shuffled in a
+ "bag", and are dealt out one by one. When the bag is empty, a new one is filled
  and shuffled.
     source: https://tetris.wiki/Tetris_Guideline
 */
 
-
 let drawTetro = () => {
 
-    let col = currentPiece.colSpawnPoint,
-        row = currentPiece.rowSpawnPoint,
-        tetroLength = currentPiece.shape.length,
+    let col = current.colSpawnPoint,
+        row = current.rowSpawnPoint,
+        tetroLength = current.shape.length,
         previousTetroColPosition = 0,
         previousTetroRowPosition = 0,
         isFirstBlockDrawn = false;
 
-    currentCoordinates = [];
-
     for (let i = 0; i < tetroLength; i++) {
         for (let j = 0; j < tetroLength; j++) {
-            if (currentPiece.shape[i][j]) {
+            if (current.shape[i][j]) {
                 if (!isFirstBlockDrawn) {
                     drawBlock(row, col);
                     isFirstBlockDrawn = !isFirstBlockDrawn;
@@ -144,8 +143,6 @@ let drawTetro = () => {
                     drawBlock(row, col);
                 }
 
-                currentCoordinates.push([row, col]);
-
                 previousTetroColPosition = j;
                 previousTetroRowPosition = i;
             }
@@ -154,9 +151,9 @@ let drawTetro = () => {
 };
 
 let getCoordinates = () => {
-    let col = currentPiece.colSpawnPoint,
-        row = currentPiece.rowSpawnPoint,
-        tetroLength = currentPiece.shape.length,
+    let col = current.colSpawnPoint,
+        row = current.rowSpawnPoint,
+        tetroLength = current.shape.length,
         previousTetroColPosition = 0,
         previousTetroRowPosition = 0,
         isFirstBlockIdentified = false;
@@ -165,7 +162,7 @@ let getCoordinates = () => {
 
     for (let i = 0; i < tetroLength; i++) {
         for (let j = 0; j < tetroLength; j++) {
-            if (currentPiece.shape[i][j]) {
+            if (current.shape[i][j]) {
                 if (!isFirstBlockIdentified) {
                     isFirstBlockIdentified = !isFirstBlockIdentified;
                 } else {
@@ -180,29 +177,29 @@ let getCoordinates = () => {
             }
         }
     }
-    // console.log(currentCoordinates);
+
     return currentCoordinates;
 };
 
-let printGrid = matrix => {
-    let rows = matrix.grid.length;
-    let cols = matrix.grid[0].length;
+let printGrid = field => {
+    let rows = field.grid.length;
+    let cols = field.grid[0].length;
 
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            document.write(`${matrix.grid[i][j]}`);
+            document.write(`${field.grid[i][j]}`);
         }
         document.write(`</br>`);
     }
 };
 
 function newPiece() {
-    currentPiece = new Piece();
-    currentPiece = Object.assign(currentPiece, arr[Math.floor(Math.random() * arr.length)]);
+    current = new Piece();
+    current = Object.assign(current, arr[Math.floor(Math.random() * arr.length)]);
 }
 
 //Warning: essa funcção só é destinada a Objetos Piece
-function isEmpty(obj = currentPiece) {
+function isEmpty(obj = current) {
     for (let _id in obj) {
         if (obj.hasOwnProperty(_id)) {
             return false;
@@ -212,19 +209,17 @@ function isEmpty(obj = currentPiece) {
 }
 
 //Check if position is valid yet
-//Cases: 
+//Cases:
 let isValid = (currentCoordinates) => {
 
 };
 
 //Check if there's no more room for the piece to move
 //Edge cases: Borders
-//            
 let isBlocked = (currentCoordinates) => {
-
     for (i = 0; i < currentCoordinates.length; i++) {
         for (j = 0; j < currentCoordinates[i].length; j++) {
-            if (currentCoordinates[i][j] == heightInBlocks - 1) {
+            if (currentCoordinates[i][0] == heightInBlocks - 1) {
                 return true;
             }
         }
@@ -232,7 +227,18 @@ let isBlocked = (currentCoordinates) => {
 
     //TODO: TRATAMENTO PARA AS OUTRAS BORDAS
 
-    //TODO: TRATAMENTO PARA PEÇA QUE COLIDEM COM AS ANTIGAS
+    //TODO: TRATAMENTO PARA PEÇA QUE COLIDE COM AS ANTIGAS,
+    //1: get coordinates from the last pieces of its respective columns
+    //How: get the biggest difference of each column
+    let bottommostBlocks = [[0,0]];
+    let count = 0;
+    currentCoordinates.forEach((elem) => {
+        if(elem[0] > bottommostBlocks[count][0]){
+            bottommostBlocks.pop();
+            bottommostBlocks.push(elem);
+        }
+    });
+
 
     return false;
 };
@@ -241,8 +247,8 @@ let clearBlock = (row, col) => {
     context.clearRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
 };
 
-let clearTetro = (currentCoordinates) => {
-    for (i = 0; i < currentCoordinates.length; i++) 
+let clearTetro = currentCoordinates => {
+    for (i = 0; i < currentCoordinates.length; i++)
         clearBlock(currentCoordinates[i][0], currentCoordinates[i][1]);
 };
 
@@ -250,24 +256,23 @@ let clearAll = () => {
     context.clearRect(1, 1, canvas.width - 2, canvas.height - 2);
 };
 
-let settleDown = (currentCoordinates) => {
-    //Passar para a matriz
-    for()
+let settleDown = currentCoordinates => {
+    currentCoordinates.forEach((item) => {
+        field.grid[item[0]][item[1]] = current.id;
+    });
 };
 
 let update = () => {
     if (isEmpty()) {
         newPiece();
+        
     } else {
         clearTetro(currentCoordinates);
     }
+
+    
     currentCoordinates = getCoordinates();
-    // clearAll();
-
     drawTetro();
-
-    // console.log(currentCoordinates);
-    // console.log(currentPiece);
 
     // if(!isValid()){
     //      console.log("You lose");
@@ -275,22 +280,34 @@ let update = () => {
     //      TODO: reset();
     // }
 
-    currentPiece.rowSpawnPoint++;
+    
+    settleDown(currentCoordinates);
 
-    // console.log(currentPiece.rowSpawnPoint);
+    current.rowSpawnPoint++;
+
     //TODO INSERT CODE THAT CHECK IF THERE'S MORE ROOM TO SLIDE
     //Check space goes down here
-    // console.log(isBlocked(currentCoordinates));
     if (isBlocked(currentCoordinates)) {
-        //TODO: settleDown(currentCoordinates);
-        currentPiece = {};
+        settleDown(currentCoordinates);
+        // current = {};
         // clearTetro(currentCoordinates);
-        // clearInterval(game);
+         clearInterval(game);
     }
 
 };
 
 init();
+
+// document.addEventListener('keydown', event => {
+//     if(event.keyCode == 37){
+//         //moveLeft();
+//     }    
+//     if (event.keyCode == 39) {
+//         //moveRight();
+//     }
+//     console.log(event);
+// });
+
 
 //Teste com todas as peças
 let arr = new Array();
@@ -301,19 +318,15 @@ arr.push(pO);
 arr.push(pS);
 arr.push(pZ);
 arr.push(pT);
-console.log(arr);
 
 clearAll();
-let game = setInterval(() => update(), tick);
-drawBlock(1, 1);
-clearBlock(1, 1);
+let game = setInterval(update, tick);
 
 function printMatrixBtn() {
-    document.write(`<button id="myBtn">Click me to PRINT A MATRIX</button>`);
+    document.write(`<button id="myBtn">Click me to PRINT A field</button>`);
 
     document.getElementById("myBtn").addEventListener("click", function () {
-        printGrid(matrix);
+        printGrid(field);
     });
 }
-
-// printMatrixBtn();
+printMatrixBtn();
