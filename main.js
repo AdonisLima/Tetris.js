@@ -3,7 +3,7 @@ let context = [];
 let field = [];
 let current = [];
 let score = 0;
-let lose = 0;
+let lose = false;
 
 const tick = 300;
 const widthInPixels = 300;
@@ -23,7 +23,7 @@ let initCanvas = () => {
 };
 
 //Cria field vazia do campo do jogo.
-let createField = () => {
+let initField = () => {
     for (let i = 0; i < heightInBlocks; i++) {
         field[i] = new Array(widthInBlocks).fill(0);
     }
@@ -35,9 +35,9 @@ let drawBlock = (row, col) => {
     context.fillRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
 };
 
-let init = () => {
+let setup = () => {
     initCanvas();
-    createField();
+    initField();
 };
 
 let pI = new Piece(1, 3, 0,
@@ -125,7 +125,6 @@ let drawTetro = () => {
         let row = current.coordinates[i][0] + current.startRowPos;
         let col = current.coordinates[i][1] + current.startColPos;
         drawBlock(row, col);
-        // field[row][col] = 1/* current.id */;
     }
 };
 
@@ -160,18 +159,8 @@ let clearTetro = () => {
 
 let clearAll = () => {
     context.clearRect(1, 1, canvas.width - 2, canvas.height - 2);
+    field = [];
 };
-
-let update = () => {
-    if (isEmpty()) {
-        newPiece();
-        drawTetro();
-    } else {
-        moveDown();
-    }
-};
-
-init();
 
 document.addEventListener('keydown', event => {
     if (!lose) {
@@ -197,6 +186,7 @@ let moveLeft = () => {
         }
     }
 
+    //Check for collision to the left
     for (let i = 0; i < current.coordinates.length; i++) {
         let row = current.coordinates[i][0] + current.startRowPos;
         let col = current.coordinates[i][1] + current.startColPos;
@@ -234,7 +224,6 @@ let moveRight = () => {
 
 
     //Check for collision with another tetros
-
     if (hasRoom) {
         clearTetro();
         current.startColPos++;
@@ -246,10 +235,8 @@ let moveDown = () => {
     let hasReachedBottom = false;
     for (let coordinate of current.coordinates) {
         let row = coordinate[0] + current.startRowPos;
-        if (row == heightInBlocks - 1) {
+        if (row == heightInBlocks - 1)
             hasReachedBottom = true;
-
-        }
     }
 
     //Check for collision below
@@ -283,11 +270,74 @@ let settleDown = () => {
     }
 };
 
-// const movement = {
-//     "default": 1,
-//     "right": 2,
-//     "left": 3,
-// };
+let rotate = () => {
+    let rotatedTetro = new Piece();
+    rotatedTetro = Object.assign(rotatedTetro, current);
+    let newCoordinates = [];
+
+    current.coordinates.forEach((coord, i) => {
+        let row = coord[0];
+        let col = coord[1];
+        let newRowCoord = getLastSquareRow() - col;
+        let newColCoord = row;
+        newCoordinates.push([newRowCoord, newColCoord]);
+    });
+
+    if(areCoordinatesValid(newCoordinates)){
+        rotatedTetro.coordinates = newCoordinates;
+        clearTetro();
+        current = rotatedTetro;
+        drawTetro();
+    }
+
+};
+
+let areCoordinatesValid = (newCoordinates) => {
+    for(let coord of newCoordinates){
+        let row = coord[0] + current.startRowPos;
+        let col = coord[1] + current.startColPos;
+        if (row < 0) return false;
+        else if (row > 19) return false;
+        else if(col < 0) return false;
+        else if(col > 9) return false;
+    }
+    return true;
+};
+
+let getLastSquareRow = () => {
+    let lastRow = 0;
+    current.coordinates.forEach(coord => {
+        if (coord[0] > lastRow) lastRow = coord[0];
+    });
+    return lastRow;
+};
+
+let isSpawnAreaOcuppied = () => {
+    for (let coord of current.coordinates){
+        let row = coord[0] + current.startRowPos;
+        let col = coord[1] + current.startColPos;
+        if (field[row][col] != 0) return true;
+    }
+    return false; 
+};
+
+let loseGame = () => {
+    //TODO: You Lose MESSAGE
+    document.write("You lose. Refresh to play again.");
+    clearAll();
+    clearInterval(game);
+};
+
+let update = () => {
+    if (isEmpty()) {
+        newPiece();
+        if(isSpawnAreaOcuppied()){
+            loseGame();
+        } else drawTetro();
+    } else {
+        moveDown();
+    }
+};
 
 //Teste com todas as peças
 let arr = new Array();
@@ -299,15 +349,6 @@ arr.push(pS);
 arr.push(pZ);
 arr.push(pT);
 
-clearAll();
+
+setup();    
 let game = setInterval(update, tick);
-
-// function printMatrixBtn() {
-//     // clearInterval(game);
-//     document.write(`<button id="myBtn">Click me to PRINT A field</button>`);
-
-//     document.getElementById("myBtn").addEventListener("mousedown", function () {
-//         printGrid(field);
-//     });
-// }
-// printMatrixBtn();
