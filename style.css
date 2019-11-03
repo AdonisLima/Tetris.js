@@ -69,6 +69,7 @@
 }
 
 .gamefield {
+    padding-top: 5px;
     border: 1px solid black;
 }
 

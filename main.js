@@ -24,9 +24,8 @@ let initCanvas = () => {
 
 //Cria field vazia do campo do jogo.
 let initField = () => {
-    for (let i = 0; i < heightInBlocks; i++) {
+    for (let i = 0; i < heightInBlocks; i++)
         field[i] = new Array(widthInBlocks).fill(0);
-    }
 };
 
 //Draws a single block given the column and the row
@@ -131,15 +130,14 @@ let drawTetro = () => {
 function newPiece() {
     current = new Piece();
     current = Object.assign(current,
-        arr[Math.floor(Math.random() * arr.length)]);
+        randomBag[Math.floor(Math.random() * randomBag.length)]);
 }
 
 function isEmpty(obj = current) {
-    for (let _id in obj) {
-        if (obj.hasOwnProperty(_id)) {
+    for (let _id in obj)
+        if (obj.hasOwnProperty(_id))
             return false;
-        }
-    }
+
     return true;
 }
 
@@ -154,11 +152,13 @@ let clearTetro = () => {
         clearBlock(row, col);
         field[row][col] = 0;
     }
-
 };
 
-let clearAll = () => {
+let clearCanvas = () => {
     context.clearRect(1, 1, canvas.width - 2, canvas.height - 2);
+};
+
+let clearField = () => {
     field = [];
 };
 
@@ -190,7 +190,7 @@ let moveLeft = () => {
     for (let i = 0; i < current.coordinates.length; i++) {
         let row = current.coordinates[i][0] + current.startRowPos;
         let col = current.coordinates[i][1] + current.startColPos;
-        if (field[row][col - 1] == 1) {
+        if (field[row][col - 1] != 0) {
             hasRoom = false;
         }
     }
@@ -217,11 +217,10 @@ let moveRight = () => {
     for (let i = 0; i < current.coordinates.length; i++) {
         let row = current.coordinates[i][0] + current.startRowPos;
         let col = current.coordinates[i][1] + current.startColPos;
-        if (field[row][col + 1] == 1) {
+        if (field[row][col + 1] != 0) {
             hasRoom = false;
         }
     }
-
 
     //Check for collision with another tetros
     if (hasRoom) {
@@ -245,7 +244,7 @@ let moveDown = () => {
         for (let i = 0; i < current.coordinates.length; i++) {
             let row = current.coordinates[i][0] + current.startRowPos;
             let col = current.coordinates[i][1] + current.startColPos;
-            if (field[row + 1][col] == 1) {
+            if (field[row + 1][col] != 0) {
                 isCollidedBelow = true;
             }
         }
@@ -258,15 +257,76 @@ let moveDown = () => {
     }
     if (isCollidedBelow || hasReachedBottom) {
         settleDown();
+        checkForFilledRows();
         current = [];
     }
+};
+
+let checkForFilledRows = () => {
+    let filledRows = getFilledRows();
+    if (filledRows.length > 0) {
+        // deleteTetroRows(filledRows);
+        realocateTetros(filledRows);
+        redrawField();
+    }
+};
+
+let realocateTetros = (filledRows) => {
+    var filtered = field.filter((value, index, arr) =>
+        arr[index].some(elem => elem == 0));
+    for (let i = 0; i < filledRows.length; i++) {
+        filtered.unshift(new Array(widthInBlocks).fill(0));
+    }
+    field = filtered;
+};
+
+let redrawField = () => {
+    clearCanvas();
+    for (let i = 0; i < field.length; i++) {
+        for (let j = 0; j < field.length; j++) {
+            context.fillStyle = (() => {
+                for(let piece of randomBag){
+                    if(piece.id == field[i][j]){
+                        return piece.color;
+                    }
+                }
+                return "#ffffff";
+            })();
+            context.fillRect(blockWidth * j, blockHeight * i, blockWidth - 1, blockHeight - 1);
+        }
+    }
+};
+
+let deleteTetroRows = filledRows => {
+    for (let filledRow of filledRows) {
+        for (let i = 0; i < field[0].length; i++) {
+            field[filledRow][i] = 0;
+        }
+    }
+};
+
+let getFilledRows = () => {
+    let filledRows = [];
+    for (let i = 0; i < field.length; i++) {
+        let isFilled = true;
+        for (let j = 0; j < field[0].length; j++) {
+            if (field[i][j] == 0) {
+                isFilled = false;
+                break;
+            }
+        }
+        if (isFilled) {
+            filledRows.push(i);
+        }
+    }
+    return filledRows;
 };
 
 let settleDown = () => {
     for (let i = 0; i < current.coordinates.length; i++) {
         let row = current.coordinates[i][0] + current.startRowPos;
         let col = current.coordinates[i][1] + current.startColPos;
-        field[row][col] = 1;
+        field[row][col] = current.id;
     }
 };
 
@@ -283,23 +343,23 @@ let rotate = () => {
         newCoordinates.push([newRowCoord, newColCoord]);
     });
 
-    if(areCoordinatesValid(newCoordinates)){
+    if (areCoordinatesValid(newCoordinates)) {
         rotatedTetro.coordinates = newCoordinates;
         clearTetro();
         current = rotatedTetro;
         drawTetro();
     }
-
 };
 
 let areCoordinatesValid = (newCoordinates) => {
-    for(let coord of newCoordinates){
+    for (let coord of newCoordinates) {
         let row = coord[0] + current.startRowPos;
         let col = coord[1] + current.startColPos;
         if (row < 0) return false;
-        else if (row > 19) return false;
-        else if(col < 0) return false;
-        else if(col > 9) return false;
+        if (row > 19) return false;
+        if (col < 0) return false;
+        if (col > 9) return false;
+        if(field[row][col] != 0) return false;
     }
     return true;
 };
@@ -313,25 +373,25 @@ let getLastSquareRow = () => {
 };
 
 let isSpawnAreaOcuppied = () => {
-    for (let coord of current.coordinates){
+    for (let coord of current.coordinates) {
         let row = coord[0] + current.startRowPos;
         let col = coord[1] + current.startColPos;
         if (field[row][col] != 0) return true;
     }
-    return false; 
+    return false;
 };
 
 let loseGame = () => {
-    //TODO: You Lose MESSAGE
-    document.write("You lose. Refresh to play again.");
-    clearAll();
+    clearCanvas();
+    clearField();
     clearInterval(game);
+    document.write("You lose. Refresh to play again.");
 };
 
 let update = () => {
     if (isEmpty()) {
         newPiece();
-        if(isSpawnAreaOcuppied()){
+        if (isSpawnAreaOcuppied()) {
             loseGame();
         } else drawTetro();
     } else {
@@ -340,15 +400,15 @@ let update = () => {
 };
 
 //Teste com todas as peças
-let arr = new Array();
-arr.push(pI);
-arr.push(pJ);
-arr.push(pL);
-arr.push(pO);
-arr.push(pS);
-arr.push(pZ);
-arr.push(pT);
+let randomBag = new Array();
+randomBag.push(pI);
+randomBag.push(pJ);
+randomBag.push(pL);
+randomBag.push(pO);
+randomBag.push(pS);
+randomBag.push(pZ);
+randomBag.push(pT);
 
 
-setup();    
+setup();
 let game = setInterval(update, tick);
