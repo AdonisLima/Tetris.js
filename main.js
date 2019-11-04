@@ -1,12 +1,3 @@
-let canvas = [];
-let context = [];
-let field = [];
-let current = [];
-let score = 0;
-let lose = false;
-let randomBag = [];
-let randomBagIndex = 0;
-
 const tick = 300;
 const widthInPixels = 300;
 const heightInPixels = 600;
@@ -15,27 +6,14 @@ const heightInBlocks = 20;
 const blockWidth = widthInPixels / widthInBlocks;
 const blockHeight = heightInPixels / heightInBlocks;
 
-let initCanvas = () => {
-    canvas = document.getElementById("game-canvas");
-    if (canvas.getContext) {
-        context = canvas.getContext("2d");
-        canvas.width = 300;
-        canvas.height = 600;
-    }
-};
-
-//Cria field vazia do campo do jogo.
-let initField = () => {
-    for (let i = 0; i < heightInBlocks; i++)
-        field[i] = new Array(widthInBlocks).fill(0);
-};
-
-//Draws a single block given the column and the row
-let drawBlock = (row, col) => {
-    context.fillStyle = current.color;
-    context.fillRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
-};
-
+let canvas = [];
+let context = [];
+let field = [];
+let current = [];
+let score = 0;
+let lose = false;
+let randomBag = [];
+let randomBagIndex = 0;
 
 let pI = new Piece(1, 3, 0,
     [
@@ -107,12 +85,31 @@ let pT = new Piece(7, 3, 0,
     '#9B00FC' //Purple
 );
 
+let drawBlock = (row, col) => {
+    context.fillStyle = current.color;
+    context.fillRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
+};
+
 let drawTetro = () => {
     for (let i = 0; i < current.coordinates.length; i++) {
         let row = current.coordinates[i][0] + current.startRowPos;
         let col = current.coordinates[i][1] + current.startColPos;
         drawBlock(row, col);
     }
+};
+
+let initCanvas = () => {
+    canvas = document.getElementById("game-canvas");
+    if (canvas.getContext) {
+        context = canvas.getContext("2d");
+        canvas.width = 300;
+        canvas.height = 600;
+    }
+};
+
+let initField = () => {
+    for (let i = 0; i < heightInBlocks; i++)
+        field[i] = new Array(widthInBlocks).fill(0);
 };
 
 let newPiece = () => {
@@ -286,8 +283,24 @@ let checkForFilledRows = () => {
     if (filledRows.length > 0) {
         realocateTetros(filledRows);
         redrawField();
+        scorePoints(filledRows);
     }
+    
 };
+
+let scorePoints = (filledRows) => {
+    if(filledRows.length == 1){
+        score += 40;
+    } else if(filledRows.length == 2){
+        score += 100
+    } else if(filledRows.length == 3){
+        score += 300
+    } else if(filledRows.length == 4){
+        score += 1200
+    }
+    document.getElementById("score").innerHTML = score;
+    console.log(score);
+}
 
 let realocateTetros = (filledRows) => {
     let filtered = field.filter((value, index, arr) =>
@@ -297,7 +310,6 @@ let realocateTetros = (filledRows) => {
     field = filtered;
     console.log(field);
 };
-
 
 let redrawField = () => {
     clearCanvas();
@@ -400,6 +412,7 @@ let loseGame = () => {
 let setup = () => {
     initCanvas();
     initField();
+    document.getElementById("score").innerHTML = score;
 };
 
 let update = () => {
@@ -411,6 +424,7 @@ let update = () => {
     } else {
         moveDown();
     }
+    
 };
 
 setup();

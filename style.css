@@ -46,11 +46,15 @@
 .grid-template-areas-2{
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 170px 170px;
-    grid-template-areas: 
-    "score gamefield next-tetramino"
+    grid-template-areas:
+    "score gamefield time"
+    ". gamefield ."
+    ". gamefield ."
+    ". gamefield .";
+    /* "score gamefield next-tetramino"
     "time gamefield next-tetramino"
     ". gamefield ."
-    ". gamefield .";    
+    ". gamefield .";     */
 }
 
 /*Grid item*/
@@ -60,8 +64,7 @@
 }
 
 .side-panel{
-    border: 1px solid brown;
-    background: #f0f5f0;
+    border: 1px solid;
 }
 
 .subitem{
@@ -75,4 +78,11 @@
 
 h2 {
     padding-top: 5px;
+}
+
+#score {
+    width: auto;
+    height: auto;
+    padding: 1.6em;
+    position: relative;
 }

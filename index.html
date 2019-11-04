@@ -10,30 +10,30 @@
 </head>
 
 <body>
-
     <div class="grid grid-template-areas-1">
         <div class="item title">
-            <h1></h1>
+            <h1>Tetris</h1>
         </div>
         <div class="item stage">
             <div class="grid subgrid grid-template-areas-2">
                 <div class="subitem side-panel score">
                     <h2>Score</h2>
-                    <span id="score"></span>
+                    <h3 id="score"></h3>
                 </div>
                 <div class="subitem side-panel time">
                     <h2>Time</h2>
-                    <span id="time"></span>
+                    <h3 id="time"></h3>
                 </div>
                 <div class="subitem gamefield" >
                     <canvas id="game-canvas"></canvas><br>
                 </div>
-                <div class="subitem side-panel next-tetramino">
+                <!-- <div class="subitem side-panel next-tetramino">
                     <h2>Next</h2>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
+    
     <script src="piece.js"></script>
     <script src="main.js"></script>
 </body>
