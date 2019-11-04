@@ -4,6 +4,8 @@ let field = [];
 let current = [];
 let score = 0;
 let lose = false;
+let randomBag = [];
+let randomBagIndex = 0;
 
 const tick = 300;
 const widthInPixels = 300;
@@ -34,10 +36,6 @@ let drawBlock = (row, col) => {
     context.fillRect(blockWidth * col, blockHeight * row, blockWidth - 1, blockHeight - 1);
 };
 
-let setup = () => {
-    initCanvas();
-    initField();
-};
 
 let pI = new Piece(1, 3, 0,
     [
@@ -109,16 +107,6 @@ let pT = new Piece(7, 3, 0,
     '#9B00FC' //Purple
 );
 
-//TODO function that randomize pieces
-/*
-    Random Generator
-The Random Generator (also known as "random bag" or "7 bag") determines the sequence
- of tetrominoes during gameplay. One of each of the 7 tetrominoes are shuffled in a
- "bag", and are dealt out one by one. When the bag is empty, a new one is filled
- and shuffled.
-    source: https://tetris.wiki/Tetris_Guideline
-*/
-
 let drawTetro = () => {
     for (let i = 0; i < current.coordinates.length; i++) {
         let row = current.coordinates[i][0] + current.startRowPos;
@@ -127,13 +115,44 @@ let drawTetro = () => {
     }
 };
 
-function newPiece() {
+let newPiece = () => {
     current = new Piece();
-    current = Object.assign(current,
-        randomBag[Math.floor(Math.random() * randomBag.length)]);
+    current = Object.assign(current, getNewPieceFromRandomBag());
 }
 
-function isEmpty(obj = current) {
+let fillRandomBag = () => {
+    let bag = new Array();
+    if (randomBag.length == 0) {
+        randomBag.push(pI);
+        randomBag.push(pJ);
+        randomBag.push(pL);
+        randomBag.push(pO);
+        randomBag.push(pS);
+        randomBag.push(pZ);
+        randomBag.push(pT);
+    }
+    shuffleBag();
+    console.log(randomBag);
+};
+
+let shuffleBag = () => {
+    for (let i = randomBag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [randomBag[i], randomBag[j]] = [randomBag[j], randomBag[i]];
+    }
+};
+
+let getNewPieceFromRandomBag = () => {
+    if(randomBagIndex == 7 || randomBag.length == 0){
+        fillRandomBag();
+        randomBagIndex = 0;
+    }
+
+    let piece = randomBag[randomBagIndex++];
+    return piece;
+}
+
+let isEmpty = (obj = current) => {
     for (let _id in obj)
         if (obj.hasOwnProperty(_id))
             return false;
@@ -265,42 +284,34 @@ let moveDown = () => {
 let checkForFilledRows = () => {
     let filledRows = getFilledRows();
     if (filledRows.length > 0) {
-        // deleteTetroRows(filledRows);
         realocateTetros(filledRows);
         redrawField();
     }
 };
 
 let realocateTetros = (filledRows) => {
-    var filtered = field.filter((value, index, arr) =>
+    let filtered = field.filter((value, index, arr) =>
         arr[index].some(elem => elem == 0));
-    for (let i = 0; i < filledRows.length; i++) {
+    for (let i = 0; i < filledRows.length; i++)
         filtered.unshift(new Array(widthInBlocks).fill(0));
-    }
     field = filtered;
+    console.log(field);
 };
+
 
 let redrawField = () => {
     clearCanvas();
     for (let i = 0; i < field.length; i++) {
         for (let j = 0; j < field.length; j++) {
             context.fillStyle = (() => {
-                for(let piece of randomBag){
-                    if(piece.id == field[i][j]){
+                for (let piece of randomBag) {
+                    if (piece.id == field[i][j]) {
                         return piece.color;
                     }
                 }
                 return "#ffffff";
             })();
             context.fillRect(blockWidth * j, blockHeight * i, blockWidth - 1, blockHeight - 1);
-        }
-    }
-};
-
-let deleteTetroRows = filledRows => {
-    for (let filledRow of filledRows) {
-        for (let i = 0; i < field[0].length; i++) {
-            field[filledRow][i] = 0;
         }
     }
 };
@@ -315,9 +326,7 @@ let getFilledRows = () => {
                 break;
             }
         }
-        if (isFilled) {
-            filledRows.push(i);
-        }
+        if (isFilled) filledRows.push(i);
     }
     return filledRows;
 };
@@ -359,7 +368,7 @@ let areCoordinatesValid = (newCoordinates) => {
         if (row > 19) return false;
         if (col < 0) return false;
         if (col > 9) return false;
-        if(field[row][col] != 0) return false;
+        if (field[row][col] != 0) return false;
     }
     return true;
 };
@@ -382,10 +391,15 @@ let isSpawnAreaOcuppied = () => {
 };
 
 let loseGame = () => {
-    clearCanvas();
+    // clearCanvas();
     clearField();
     clearInterval(game);
     document.write("You lose. Refresh to play again.");
+};
+
+let setup = () => {
+    initCanvas();
+    initField();
 };
 
 let update = () => {
@@ -398,17 +412,6 @@ let update = () => {
         moveDown();
     }
 };
-
-//Teste com todas as peças
-let randomBag = new Array();
-randomBag.push(pI);
-randomBag.push(pJ);
-randomBag.push(pL);
-randomBag.push(pO);
-randomBag.push(pS);
-randomBag.push(pZ);
-randomBag.push(pT);
-
 
 setup();
 let game = setInterval(update, tick);
