@@ -42,7 +42,7 @@ let pL = new Piece(3, 3, 0,
         [1, 1],
         [1, 2],
     ],
-    '#E46F02' //Orange
+    '#E46F02' //Orxnge
 );
 
 let pO = new Piece(4, 3, 0,
