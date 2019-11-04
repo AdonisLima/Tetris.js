@@ -1,4 +1,4 @@
 # Tetris.js
-Tetris made with vanilla JavaScript and HTML5 canvas.
+A simple tetris clone made with vanilla JavaScript and HTML5.
 
-It's a work in progress.
+Use the arrow keys to play.
