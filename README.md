@@ -3,6 +3,6 @@ A simple tetris clone made with JavaScript and HTML5 with the purpose of learn m
 
 Definetly not the most efficient implementation.
 
-Use the arrow keys to play.
+Use the arrow keys to play.<br/>
 Demo: https://adonislima.github.io/tetriss.js
 
