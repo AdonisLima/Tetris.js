@@ -1,7 +1,5 @@
 # Tetris.js
-A simple tetris clone made with JavaScript and HTML5 with the purpose of learn more about ES6.
-
-Definetly not the most efficient implementation.
+A simple tetris clone made with JavaScript and HTML5 with the purpose of learning more about ES6.
 
 Use the arrow keys to play.<br/>
 Demo: https://adonislima.github.io/tetriss.js
